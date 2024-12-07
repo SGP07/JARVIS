@@ -16,25 +16,6 @@ client = Groq(
     api_key=os.environ.get("GROQ_API_KEY"),
 )
 
-def summarize_content(search_results):
-    
-
-    chat_completion = client.chat.completions.create(
-    messages = [
-    {
-        "role": "system",
-        "content": "You are a search results condensation assistant. Summarize each search result in 2-3 sentences while keeping the exact original format: 'Number. Title: {title}\nURL: {url}\nContent: {condensed_content}'. Preserve the full title and URL, and distill the content to its most essential information, capturing the key points concisely."
-    },
-    {
-        "role": "user",
-        "content": f"Provide a concise summary of these search results:\n{search_results}"
-    }
-],
-    model="llama3-8b-8192",
-)
-
-    return chat_completion.choices[0].message.content
-
 def process_response(response, num_results=4):
     search_results = ""
     for i in range(num_results):
@@ -44,15 +25,13 @@ def process_response(response, num_results=4):
 
 
 def search_web(query: str, num_results=4):
-    print(f"\n###Searching for : {query}")
+    print(f"\n###Searching for : {query}, num results: {num_results}")
     response = tavily_client.search(query)
 
     results = process_response(response["results"], num_results)
-    # smry_rslt = summarize_content(results)
-    smry_rslt = results
 
-    print(f"\n*Results*:\n{smry_rslt}\n")
-    return smry_rslt
+    print(f"\n*Results*:\n{results}\n")
+    return results
 
 def get_weather(location):
     print(f"\n\nrequesting weather in {location}")
@@ -92,51 +71,8 @@ def get_datetime():
     return datetime.now().strftime("%d/%m/%Y %H:%M")
 
 
-def get_tools():
+def get_search_tool():
     return [
-         {
-        "type": "function",
-        "function": {
-            "name": "recall_memories",
-            "description": "Retrieve relevant memories based on a given query",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "A text query to search and retrieve relevant memories"
-                    },
-                    "num_results": {
-                        "type": "integer",
-                        "description": "The maximum number of memory results to return (optional, defaults to 3)",
-                        "default": 3
-                    }
-                },
-                "required": ["query"]
-            }
-        }
-    },
-        {
-            "type": "function",
-            "function": {
-                "name": "insert_memories",
-                "description": "Insert one or multiple memories into the collection",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "memories": {
-                            "type": "array",
-                            "items": {
-                                "type": "string"
-                            },
-                            "description": "A list of memory contents to be inserted. Can be a single memory or multiple memories."
-                        }
-                    },
-                    "required": ["memories"]
-                }
-            }
-        },
-        
         {
             "type": "function",
             "function": {
@@ -156,23 +92,6 @@ def get_tools():
                         }
                     },
                     "required": ["query"]
-                }
-            }
-        },
-        {
-            "type": "function", 
-            "function": {
-                "name": "update_core_memory", 
-                "description": "Appends a new line to the core memory ",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "new_line": {
-                            "type": "string",
-                            "description": "The new line of text to append to the core memory "
-                        }
-                    },
-                    "required": ["new_line"]
                 }
             }
         },
@@ -199,120 +118,54 @@ def get_tools():
                 }
             }
         },
+    ]
+
+def get_agent_tools():
+    return [
         {
             "type": "function",
             "function": {
-                "name": "fetch_projects",
-                "description": "Retrieve all projects and their associated tasks from Todoist",
+                "name": "utility_manager",
+                "description": "Manages and responds to utility-related queries or tasks using natural language processing",
                 "parameters": {
                     "type": "object",
-                    "properties": {},
-                    "required": []
+                    "properties": {
+                        "user_prompt": {
+                            "type": "string",
+                            "description": "Natural language prompt describing a utility-related task or query",
+                            "examples": [
+                                "Calculate my electricity bill for this month",
+                                "Help me understand my water usage",
+                                "Schedule a maintenance check for my home utilities",
+                                "Compare electricity providers in my area"
+                            ]
+                        }
+                    },
+                    "required": ["user_prompt"]
                 }
             }
         },
         {
             "type": "function",
             "function": {
-                "name": "create_project",
-                "description": "Create a new project in Todoist",
+                "name": "todolist_manager",
+                "description": "Manages todo lists through natural language interactions, including adding, removing, updating, and organizing tasks",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "name": {
+                        "user_prompt": {
                             "type": "string",
-                            "description": "Name of the new project to be created"
+                            "description": "Natural language prompt for managing todo list tasks",
+                            "examples": [
+                                "Add a new task to buy groceries this weekend",
+                                "List all my current tasks",
+                                "Mark the project report task as complete",
+                                "Remove the gym appointment from my todo list",
+                                "Prioritize my tasks for this week"
+                            ]
                         }
                     },
-                    "required": ["name"]
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "create_task",
-                "description": "Create a new task in a specific Todoist project",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "name": {
-                            "type": "string",
-                            "description": "Name/content of the task"
-                        },
-                        "project_id": {
-                            "type": "integer",
-                            "description": "ID of the project to which the task belongs"
-                        },
-                        "description": {
-                            "type": "string",
-                            "description": "Optional detailed description of the task"
-                        },
-                        "due_string": {
-                            "type": "string",
-                            "description": "Optional due date/time for the task (e.g., 'tomorrow', '2024-12-31')"
-                        },
-                        "priority": {
-                            "type": "integer",
-                            "description": "Optional priority of the task (1-4)"
-                        }
-                    },
-                    "required": ["name", "project_id"]
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "update_task_due_date",
-                "description": "Update the due date of an existing task",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "task_id": {
-                            "type": "integer",
-                            "description": "ID of the task to update"
-                        },
-                        "due_string": {
-                            "type": "string",
-                            "description": "New due date/time for the task (e.g., 'tomorrow', '2024-12-31')"
-                        }
-                    },
-                    "required": ["task_id", "due_string"]
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "close_task",
-                "description": "Mark a specific task as completed",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "task_id": {
-                            "type": "integer",
-                            "description": "ID of the task to close/complete"
-                        }
-                    },
-                    "required": ["task_id"]
-                }
-            }
-        },
-        {
-            "type": "function",
-            "function": {
-                "name": "delete_project",
-                "description": "Delete a specific project from Todoist",
-                "parameters": {
-                    "type": "object",
-                    "properties": {
-                        "project_id": {
-                            "type": "integer",
-                            "description": "ID of the project to be deleted"
-                        }
-                    },
-                    "required": ["project_id"]
+                    "required": ["user_prompt"]
                 }
             }
         }

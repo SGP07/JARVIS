@@ -1,42 +1,62 @@
-from agent import Agent
-from prompts import jarvis_system 
-from todoist import fetch_projects, create_project, delete_project,  create_task, close_task, update_task_due_date
-from memory import insert_memories, recall_memories, get_core_memory, update_core_memory
-from utils import search_web, get_weather, get_tools
+from todoist import fetch_projects, create_project, delete_project,  create_task, close_task, update_task_due_date, get_todo_tools
+from memory import insert_memories, recall_memories, get_core_memory, update_core_memory, get_memory_tools
+from utils import get_search_tool, search_web, get_weather, get_datetime, get_agent_tools
 from dotenv import load_dotenv
-import discord
+from prompts import jarvis_system, utility_system, todo_system
+from agent import Agent
 from discord.ext import commands
+import discord
 import os
 
 load_dotenv()
 
-MODEL = "llama3-groq-70b-8192-tool-use-preview"
-
-jarvis_tools = get_tools()
-jarvis_functions = {
-        "recall_memories": recall_memories,
-        "insert_memories": insert_memories,
-        "search_web": search_web,
-        "update_core_memory": update_core_memory,
-        "get_weather": get_weather,
+todo_agent = Agent(
+    model="mixtral-8x7b-32768",
+    max_tokens=4096,
+    temperature=0,
+    system_prompt=todo_system,
+    tools = get_todo_tools(),
+    functions=  {      
         "fetch_projects": fetch_projects,
         "create_project": create_project,
         "create_task": create_task,
         "update_task_due_date": update_task_due_date,
         "close_task": close_task,
         "delete_project": delete_project
-    }
-
-jarvis = Agent(
-    model=MODEL,
-    max_tokens=8192,
-    temperature=0.8,
-    system_prompt=jarvis_system,
-    core_memory_path= "core_memory.txt",
-    tools=jarvis_tools,
-    functions=jarvis_functions
+        },
+    maintain_history=True
 )
 
+utility_agent = Agent(
+    model="llama3-8b-8192",
+    max_tokens=4096,
+    temperature=0,
+    system_prompt=utility_system,
+    tools = get_search_tool(),
+    functions= {
+        "search_web": search_web,
+        "get_weather": get_weather,
+        }
+)
+
+jarvis_tools = get_memory_tools() + get_agent_tools()
+
+
+jarvis = Agent(
+    model="llama3-groq-70b-8192-tool-use-preview",
+    max_tokens=8192,
+    temperature=0.8,
+    system_prompt=f"{jarvis_system} \n{get_core_memory}\nCurrent date and time: {get_datetime()}",
+    tools=jarvis_tools,
+    functions={
+        "recall_memories": recall_memories,
+        "insert_memories": insert_memories, 
+        "update_core_memory": update_core_memory,
+        "utility_manager": utility_agent.run_conversation,
+        "todolist_manager": todo_agent.run_conversation,
+    },
+    maintain_history=True
+)
 
 CHANNEL_ID = 1314631981098864752 
 TOKEN = os.environ.get("DISCORD_TOKEN")

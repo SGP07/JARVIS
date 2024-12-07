@@ -134,3 +134,125 @@ def delete_project(project_id):
         error_message = f"Error deleting project {project_id}: {error}"
         print(error_message)
         return {"message": error_message}
+    
+def get_todo_tools():
+    return [        
+        {
+            "type": "function",
+            "function": {
+                "name": "fetch_projects",
+                "description": "Retrieve all projects and their associated tasks from Todoist",
+                "parameters": {
+                    "type": "object",
+                    "properties": {},
+                    "required": []
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "create_project",
+                "description": "Create a new project in Todoist",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Name of the new project to be created"
+                        }
+                    },
+                    "required": ["name"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "create_task",
+                "description": "Create a new task in a specific Todoist project",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string",
+                            "description": "Name/content of the task"
+                        },
+                        "project_id": {
+                            "type": "integer",
+                            "description": "ID of the project to which the task belongs"
+                        },
+                        "description": {
+                            "type": "string",
+                            "description": "Optional detailed description of the task"
+                        },
+                        "due_string": {
+                            "type": "string",
+                            "description": "Optional due date/time for the task (e.g., 'tomorrow', '2024-12-31')"
+                        },
+                        "priority": {
+                            "type": "integer",
+                            "description": "Optional priority of the task (1-4)"
+                        }
+                    },
+                    "required": ["name", "project_id"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "update_task_due_date",
+                "description": "Update the due date of an existing task",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "task_id": {
+                            "type": "integer",
+                            "description": "ID of the task to update"
+                        },
+                        "due_string": {
+                            "type": "string",
+                            "description": "New due date/time for the task (e.g., 'tomorrow', '2024-12-31')"
+                        }
+                    },
+                    "required": ["task_id", "due_string"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "close_task",
+                "description": "Mark a specific task as completed",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "task_id": {
+                            "type": "integer",
+                            "description": "ID of the task to close/complete"
+                        }
+                    },
+                    "required": ["task_id"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "delete_project",
+                "description": "Delete a specific project from Todoist",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "project_id": {
+                            "type": "integer",
+                            "description": "ID of the project to be deleted"
+                        }
+                    },
+                    "required": ["project_id"]
+                }
+            }
+        }
+    ]
+

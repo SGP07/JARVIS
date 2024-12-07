@@ -62,4 +62,66 @@ def update_core_memory(new_line):
         
     with open("core_memory.txt", "a+") as f:
         f.write(new_line)
-    
+
+def get_memory_tools():
+     return [
+         {
+            "type": "function",
+            "function": {
+                "name": "recall_memories",
+                "description": "Retrieve relevant memories based on a given query",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "A text query to search and retrieve relevant memories"
+                        },
+                        "num_results": {
+                            "type": "integer",
+                            "description": "The maximum number of memory results to return (optional, defaults to 3)",
+                            "default": 3
+                        }
+                    },
+                    "required": ["query"]
+                }
+            }
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "insert_memories",
+                "description": "Insert one or multiple memories into the collection",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "memories": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "description": "A list of memory contents to be inserted. Can be a single memory or multiple memories."
+                        }
+                    },
+                    "required": ["memories"]
+                }
+            }
+        },
+        {
+            "type": "function", 
+            "function": {
+                "name": "update_core_memory", 
+                "description": "Appends a new line to the core memory ",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "new_line": {
+                            "type": "string",
+                            "description": "The new line of text to append to the core memory "
+                        }
+                    },
+                    "required": ["new_line"]
+                }
+            }
+        },
+    ]
