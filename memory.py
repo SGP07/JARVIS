@@ -47,8 +47,8 @@ def recall_memories(query, num_results=2):
     processed_results = process_results(results)
     return results_to_string(processed_results)
 
-def get_core_memory(path):
-    with open(path, "r") as f:
+def get_core_memory():
+    with open("core_memory.txt", "r") as f:
         core_memory = f.read()
 
     print(f"\n\n###CORE MEMORY:\n{core_memory}\n\n")

@@ -45,12 +45,8 @@ def create_project(name):
     print(f"\n\n### Creating project: {name}")
     try:
         project = api.add_project(name=name)
-        project_data = {
-            "project_id": project.id,
-            "project_name": project.name
-        }
-        print(f"Project created: {project_data}")
-        return {"message": "Project created successfully", "project": project_data}
+        print(f"Project created: {project}")
+        return f"created project {project.name} successfully with id {project.id}"
     except Exception as error:
         error_message = f"Error creating project: {error}"
         print(error_message)

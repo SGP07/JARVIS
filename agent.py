@@ -6,7 +6,8 @@ import json
 load_dotenv()
 
 class Agent:
-    def __init__(self, model, max_tokens, temperature, system_prompt, tools, functions, maintain_history=False):
+    def __init__(self, name, model, max_tokens, temperature, system_prompt, tools, functions, maintain_history=False):
+        self.name = name
         self.model = model
         self.max_tokens = max_tokens
         self.tools = tools
@@ -23,6 +24,7 @@ class Agent:
                 "content": system_prompt
             }
         ]
+        print(f"\n\n-----init {self.name}-----\n{self.system_prompt}\n\n\n")
 
 
     def run_conversation(self, user_prompt):
@@ -40,9 +42,10 @@ class Agent:
 
             final_response = self.chat_completion()
         else:
+            print("I'm here")
             final_response = response
         
-        print(final_response)
+        print(f"\n{self.name}: {final_response}\n")
         return final_response.content
     
     def chat_completion(self):
@@ -61,6 +64,7 @@ class Agent:
         return response_message
     
     def process_tool_calls(self, tool_calls):
+        print(f"{self.name} tool calls: {tool_calls}\n")
         for tool_call in tool_calls:
             print(f"----------------\n\n{tool_call}\n\n----------------")
             function_name = tool_call.function.name
@@ -68,6 +72,7 @@ class Agent:
             function_args = json.loads(tool_call.function.arguments)
             
             function_response = function_to_call(**function_args)
+            print(f"\nresponse:\n{function_response}\n")
 
             self.messages.append({
             "tool_call_id": tool_call.id, 

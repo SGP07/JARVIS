@@ -11,10 +11,11 @@ import os
 load_dotenv()
 
 todo_agent = Agent(
-    model="mixtral-8x7b-32768",
+    name="todo", 
+    model="llama3-groq-70b-8192-tool-use-preview",
     max_tokens=4096,
     temperature=0,
-    system_prompt=todo_system,
+    system_prompt=f"{todo_system}\nCurrent date and time: {get_datetime()}\nUse this date for any time-sensitive queries or date-specific requests",
     tools = get_todo_tools(),
     functions=  {      
         "fetch_projects": fetch_projects,
@@ -28,10 +29,11 @@ todo_agent = Agent(
 )
 
 utility_agent = Agent(
-    model="llama3-8b-8192",
+    name="utility", 
+    model="llama3-groq-70b-8192-tool-use-preview",
     max_tokens=4096,
     temperature=0,
-    system_prompt=utility_system,
+    system_prompt=f"{utility_system}\nCurrent date and time: {get_datetime()}",
     tools = get_search_tool(),
     functions= {
         "search_web": search_web,
@@ -43,10 +45,11 @@ jarvis_tools = get_memory_tools() + get_agent_tools()
 
 
 jarvis = Agent(
+    name="jarvis", 
     model="llama3-groq-70b-8192-tool-use-preview",
     max_tokens=8192,
     temperature=0.8,
-    system_prompt=f"{jarvis_system} \n{get_core_memory}\nCurrent date and time: {get_datetime()}",
+    system_prompt=f"{jarvis_system} \n{get_core_memory()}\nCurrent date and time: {get_datetime()}",
     tools=jarvis_tools,
     functions={
         "recall_memories": recall_memories,
