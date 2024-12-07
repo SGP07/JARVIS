@@ -36,13 +36,11 @@ class Agent:
         self.messages.append({"role": "user", "content": user_prompt})
         
         response = self.chat_completion()
-        tool_calls = response.tool_calls
-        if tool_calls:
-            self.process_tool_calls(tool_calls)
+        while tool_calls := response.tool_calls:
 
-            final_response = self.chat_completion()
+            self.process_tool_calls(tool_calls)
+            response = self.chat_completion()
         else:
-            print("I'm here")
             final_response = response
         
         print(f"\n{self.name}: {final_response}\n")
