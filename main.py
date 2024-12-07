@@ -10,9 +10,11 @@ import os
 
 load_dotenv()
 
+MODEL = "llama3-groq-70b-8192-tool-use-preview"
+
 todo_agent = Agent(
     name="todo", 
-    model="llama3-groq-70b-8192-tool-use-preview",
+    model=MODEL,
     max_tokens=4096,
     temperature=0,
     system_prompt=f"{todo_system}\nCurrent date and time: {get_datetime()}\nUse this date for any time-sensitive queries or date-specific requests",
@@ -30,7 +32,7 @@ todo_agent = Agent(
 
 utility_agent = Agent(
     name="utility", 
-    model="llama3-groq-70b-8192-tool-use-preview",
+    model=MODEL,
     max_tokens=4096,
     temperature=0,
     system_prompt=f"{utility_system}\nCurrent date and time: {get_datetime()}",
@@ -46,7 +48,7 @@ jarvis_tools = get_memory_tools() + get_agent_tools()
 
 jarvis = Agent(
     name="jarvis", 
-    model="llama3-groq-70b-8192-tool-use-preview",
+    model=MODEL,
     max_tokens=8192,
     temperature=0.8,
     system_prompt=f"{jarvis_system} \n{get_core_memory()}\nCurrent date and time: {get_datetime()}",
