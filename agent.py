@@ -1,5 +1,9 @@
+from memory import get_core_memory
+from utils import get_datetime
+from prompts import jarvis_system
 from groq import Groq
 from dotenv import load_dotenv
+from cprint import cprint
 import os
 import json
 
@@ -47,15 +51,16 @@ class Agent:
         return final_response.content
     
     def chat_completion(self):
+        cprint(self.messages[-1])
         response = self.client.chat.completions.create(
-        model = self.model,
-        messages = self.messages,
-        stream= False,
-        tools = self.tools,
-        tool_choice = "auto",
-        max_tokens = self.max_tokens,
-        temperature= self.temperature
-    )
+            model = self.model,
+            messages = self.messages,
+            stream= False,
+            tools = self.tools,
+            tool_choice = "auto",
+            max_tokens = self.max_tokens,
+            temperature= self.temperature
+        )
         response_message = response.choices[0].message
         self.messages.append(response_message)
 
@@ -71,6 +76,8 @@ class Agent:
             
             function_response = function_to_call(**function_args)
             print(f"\nresponse:\n{function_response}\n")
+            if function_name == "update_core_memory":
+                self.update_system_prompt(f"{jarvis_system} \n{get_core_memory()}\nCurrent date and time: {get_datetime()}")
 
             self.messages.append({
             "tool_call_id": tool_call.id, 
@@ -86,5 +93,5 @@ class Agent:
                 "content": new_system_prompt
             }
         ]
-    
+        print(f"\n\nSYSTEM PROMPT UPDATE\n{new_system_prompt}\n\n")
         

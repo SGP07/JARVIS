@@ -1,5 +1,5 @@
 from todoist import fetch_projects, create_project, delete_project,  create_task, close_task, update_task_due_date, get_todo_tools
-from memory import insert_memories, recall_memories, get_core_memory, update_core_memory, get_memory_tools
+from memory import insert_memories, recall_memories, get_core_memory, core_memory_append, core_memory_replace, get_memory_tools
 from utils import get_search_tool, search_web, get_weather, get_datetime, get_agent_tools
 from dotenv import load_dotenv
 from prompts import jarvis_system, utility_system, todo_system
@@ -51,12 +51,13 @@ jarvis = Agent(
     model=MODEL,
     max_tokens=8192,
     temperature=0.8,
-    system_prompt=f"{jarvis_system} \n{get_core_memory()}\nCurrent date and time: {get_datetime()}",
+    system_prompt=f"{jarvis_system}\n{get_core_memory()}\nCurrent date and time: {get_datetime()}",
     tools=jarvis_tools,
     functions={
         "recall_memories": recall_memories,
         "insert_memories": insert_memories, 
-        "update_core_memory": update_core_memory,
+        "core_memory_append": core_memory_append,
+        "core_memory_replace": core_memory_replace,
         "utility_manager": utility_agent.run_conversation,
         "todolist_manager": todo_agent.run_conversation,
     },

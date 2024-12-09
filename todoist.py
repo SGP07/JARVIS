@@ -91,7 +91,7 @@ def update_task_due_date(task_id, due_string):
         if is_success:
             msg = f"Due date for task {task_id} updated to {due_string}"
             print(msg)
-            return {"message": msg}
+            return msg
         else:
             raise Exception("Update failed")
     except Exception as error:

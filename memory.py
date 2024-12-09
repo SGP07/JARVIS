@@ -55,13 +55,21 @@ def get_core_memory():
     return core_memory
 
 
-def update_core_memory(new_line):
-    print(f"\n\n### CORE MEMORY UPDATED:\nadded the following:\n{new_line}\n\n")
-    if not new_line.startswith("\n"):
-        new_line = "\n- " + new_line
+def core_memory_append(memory):
+    print(f"\n\n### CORE MEMORY APPENED:\nadded the following:\n{memory}\n\n")
+    if not memory.startswith("\n"):
+        memory = "\n- " + memory
         
     with open("core_memory.txt", "a+") as f:
-        f.write(new_line)
+        f.write(memory)
+
+def core_memory_replace(target_text, replacement_text):
+    print(f"\n\n### CORE MEMORY replaced:\nnew text:\n{replacement_text}\n\n")
+    content = get_core_memory()
+    content = content.replace(target_text, replacement_text)
+    
+    with open("core_memory.txt", "a+") as f:
+        f.write(content)
 
 def get_memory_tools():
      return [
@@ -110,18 +118,41 @@ def get_memory_tools():
         {
             "type": "function", 
             "function": {
-                "name": "update_core_memory", 
+                "name": "core_memory_append",
                 "description": "Appends a new line to the core memory ",
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "new_line": {
+                        "memory": {
                             "type": "string",
                             "description": "The new line of text to append to the core memory "
                         }
                     },
-                    "required": ["new_line"]
+                    "required": ["memory"]
                 }
             }
         },
+        {
+            "type": "function", 
+            "function": {
+                "name": "core_memory_replace",
+                "description": "Replaces text in the core memory with new text",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "target_text": {
+                            "type": "string",
+                            "description": "The exact string you want to replace from the core memory"
+                        },
+                        "replacement_text": {
+                            "type": "string",
+                            "description": "The new value you want to replace the string with"
+                        }
+                        
+                    },
+                    "required": ["memory"]
+                }
+            }
+        },
+
     ]
