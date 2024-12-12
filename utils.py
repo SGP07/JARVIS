@@ -68,7 +68,7 @@ def get_weather(location):
         return None
 
 def get_datetime():
-    return datetime.now().strftime("%d/%m/%Y %H:%M")
+    return datetime.now().strftime("%a %d %B %Y at %H:%M")
 
 
 def get_search_tool():
