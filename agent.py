@@ -74,7 +74,14 @@ class Agent:
             function_to_call = self.functions[function_name]
             function_args = json.loads(tool_call.function.arguments)
             
-            function_response = function_to_call(**function_args)
+            try:
+                function_response = function_to_call(**function_args)
+                print(f"\nresponse:\n{function_response}\n")
+            except Exception as e:
+                function_response = {"error": str(e)}
+                print(f"\nError in function {function_name}: {function_response}\n")
+            
+
             print(f"\nresponse:\n{function_response}\n")
             if function_name == "update_core_memory":
                 self.update_system_prompt(f"{jarvis_system} \n{get_core_memory()}\nCurrent date and time: {get_datetime()}")

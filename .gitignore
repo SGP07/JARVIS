@@ -5,3 +5,6 @@ DB/
 
 .env
 *.txt
+
+imgs/
+voicemsgs/
